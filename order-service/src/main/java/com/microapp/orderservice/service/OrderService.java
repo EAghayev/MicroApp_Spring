@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -32,15 +30,10 @@ public class OrderService {
                 .createdAt(LocalDateTime.now())
                 .orderNumber(UUID.randomUUID().toString()).build();
 
-        List<OrderItem> items = createDto.getOrderItems().stream().map(this::mapToEntity).toList();
-        entity.setOrderItemsList(items);
 
-        List<Long> productIds = items.stream().map(OrderItem::getProductId).toList();
 
-//        ProductResponseDto[] productArr = webClient.get()
-//                .uri("http://localhost:8051/api/v1/products/all",
-//                        uriBuilder -> uriBuilder.queryParam("id",productIds).build())
-//                .retrieve().bodyToMono(ProductResponseDto[].class).block();
+        List<Long> productIds = createDto.getOrderItems().stream().map(OrderItemCreateDto::getProductId).toList();
+
         log.info("testing");
         ProductResponseDto[] productArr = productClient.getAll(productIds);
 
@@ -52,25 +45,40 @@ public class OrderService {
 
         List<String> skuCodes = Arrays.stream(productArr).map(ProductResponseDto::getSkuCode).toList();
 
-
-//        InventoryStatusResponseDto[] inventoryStatusArr = webClient.get()
-//                        .uri("http://localhost:8053/api/v1/inventories",
-//                                uriBuilder -> uriBuilder.queryParam("skuCode",skuCodes).build())
-//                        .retrieve().bodyToMono(InventoryStatusResponseDto[].class)
-//                        .block();
         InventoryStatusResponseDto[] inventoryStatusArr = inventoryClient.getAll(skuCodes);
 
         boolean allAreInStock = Arrays.stream(inventoryStatusArr).allMatch(InventoryStatusResponseDto::isInStock);
 
 
-        if (inventoryStatusArr.length==productArr.length && allAreInStock){
-            orderJpaRepository.save(entity);
-        }
-        else {
+        if (inventoryStatusArr.length!=productArr.length || !allAreInStock){
             throw new RestException(HttpStatus.BAD_REQUEST,"Not all products is in stock!");
         }
 
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        for (var itemDto:createDto.getOrderItems()){
+            ProductResponseDto pr = Arrays.stream(productArr).filter(x-> Objects.equals(x.getId(), itemDto.getProductId())).findFirst().orElseThrow();
+            OrderItem item = OrderItem.builder()
+                            .unitPrice(pr.getSalePrice())
+                            .quantity(itemDto.getQuantity())
+                            .productId(itemDto.getProductId())
+                            .order(entity)
+                    .build();
+            orderItems.add(item);
+        }
+
+        entity.setOrderItems(orderItems);
+        orderJpaRepository.save(entity);
+
+
         return mapToDto(entity);
+    }
+
+    public List<OrderGetDto> getAll(){
+        var data = orderJpaRepository.findAll();
+
+        var dto = data.stream().map(this::mapToDto).toList();
+        return  dto;
     }
 
 
@@ -83,12 +91,12 @@ public class OrderService {
         return OrderGetDto.builder()
                 .id(entity.getId())
                 .createdAt(entity.getCreatedAt())
-                .orderItems(entity.getOrderItemsList().stream().map(this::mapToDto).toList()).build();
+                .orderItems(entity.getOrderItems().stream().map(this::mapToDto).toList()).build();
     }
     private OrderItemGetDto mapToDto(OrderItem entity){
         return OrderItemGetDto.builder()
                 .id(entity.getId())
-                .price(entity.getPrice())
+                .unitPrice(entity.getUnitPrice())
                 .quantity(entity.getQuantity()).build();
     }
 

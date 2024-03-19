@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/inventories")
+@RequestMapping("/inventories")
 @RequiredArgsConstructor
 public class InventoriesController {
 
@@ -33,6 +33,11 @@ public class InventoriesController {
     public ResponseEntity<Object> create(@RequestBody @Valid InventoryCreateDto createDto){
         inventoryService.create(createDto);
         return ResponseEntity.status(201).build();
+    }
+
+    @GetMapping("all")
+    public ResponseEntity<List<InventoryStatusGetDto>> getAll(){
+        return ResponseEntity.ok(inventoryService.getAll());
     }
 
 }

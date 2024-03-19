@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping("/products")
 @RequiredArgsConstructor
 public class ProductsController {
 
@@ -41,5 +41,10 @@ public class ProductsController {
     public ResponseEntity<Object> update(@PathVariable @NotNull Long id, @RequestBody @Valid ProductCreateDto updateDto){
         productService.update(id,updateDto);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("data")
+    public String get(){
+        return "Hello Product";
     }
 }

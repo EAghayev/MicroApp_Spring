@@ -24,11 +24,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductService {
 
+
     private final ProductJpaRepository productJpaRepository;
     private final ProductRepository productRepository;
     private final WebClient webClient;
 
-    public Product create(ProductCreateDto createDto){
+    public ProductGetDto create(ProductCreateDto createDto){
 
         if(productJpaRepository.existsByName(createDto.getName())){
             throw new RestException(HttpStatus.BAD_REQUEST,"name",ResponseMessage.ERROR_PRODUCT_EXISTS_BY_NAME);
@@ -51,11 +52,11 @@ public class ProductService {
                 .quantity(createDto.getQuantity()).build();
 
         var response = webClient.post()
-                .uri("http://localhost:8053/api/v1/inventories")
+                .uri("http://localhost:8080/inventories")
                 .body(Mono.just(inventoryRequest),InventoryCreateRequestDto.class)
                 .retrieve().bodyToMono(Object.class).block();
 
-        return entity;
+        return mapToDto(entity);
     }
 
     public Product update(Long id,ProductCreateDto updateDto){

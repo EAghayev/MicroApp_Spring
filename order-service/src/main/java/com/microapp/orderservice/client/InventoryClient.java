@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name="inventoryClient",url="http://localhost:8053/api/v1/inventories")
+@FeignClient(name="inventoryClient",url="http://localhost:8080/inventories")
 public interface InventoryClient {
     @GetMapping("")
     InventoryStatusResponseDto[] getAll(@RequestParam  List<String> skuCode);

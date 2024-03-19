@@ -29,7 +29,7 @@ public class InventoryService {
         return inventoryJpaRepository.findAll().stream().map(this::mapToDto).toList();
     }
 
-    public void create(InventoryCreateDto createDto){
+    public InventoryStatusGetDto create(InventoryCreateDto createDto){
 
         if(inventoryJpaRepository.existsBySkuCode(createDto.getSkuCode())){
             throw new RestException(HttpStatus.BAD_REQUEST,"skuCode","Inventory already exists by given skuCode");
@@ -40,6 +40,8 @@ public class InventoryService {
                 .quantity(createDto.getQuantity()).build();
 
         inventoryJpaRepository.save(entity);
+
+        return mapToDto(entity);
     }
 
 

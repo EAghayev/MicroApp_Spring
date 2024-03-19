@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "productClient",url = "http://localhost:8051/api/v1/products")
+@FeignClient(name = "productClient",url = "http://localhost:8080/products")
 public interface ProductClient {
 
     @GetMapping("/all")

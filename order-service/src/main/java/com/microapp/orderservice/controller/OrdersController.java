@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/orders")
+@RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrdersController {
 
@@ -31,5 +31,10 @@ public class OrdersController {
         return ResponseEntity.ok(productClient.getAll());
     }
 
+    @GetMapping()
+    public ResponseEntity<Object> getAll(){
+        var data = orderService.getAll();
+        return  ResponseEntity.ok(data);
+    }
 
 }

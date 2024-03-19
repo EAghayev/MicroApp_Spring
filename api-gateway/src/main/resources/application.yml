@@ -1,0 +1,28 @@
+#spring:
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: product-service
+#          uri: lb://product-service
+#          predicates:
+#          -  Path=/products/**
+##          filters:
+##          - RewritePath=/api/v1/product-service/products/data/(?<segment>.*), /$\{segment}
+#
+#        - id: order-service
+#          uri: lb://order-service
+#          predicates:
+#            - Path=/order/**
+#
+#        - id: inventory-service
+#          uri: lb://inventory-service
+#          predicates:
+#            - Path=/inventory/**
+#
+#  application:
+#    name: api-gateway
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone : http://localhost:8761/eureka/

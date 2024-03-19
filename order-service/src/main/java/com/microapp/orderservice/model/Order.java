@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,8 +23,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String orderNumber;
-    @JoinColumn(name = "teacher_id")
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderItem> orderItemsList;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<OrderItem> orderItems = new ArrayList<>();
     private LocalDateTime createdAt;
 }
